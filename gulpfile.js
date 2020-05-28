@@ -1,6 +1,5 @@
 var gulp = require('gulp');//能夠套用gulp這個套件
 
-
 gulp.task('hello',function(){
     //開始做事情拉捧友
     console.log('hello word');
@@ -86,3 +85,25 @@ gulp.task('fileinclude', function () {
 //老師有上傳完整合併版本可以多學習學習
 
 
+
+
+// html 樣板
+var fileinclude = require('gulp-file-include');
+gulp.task('fileinclude', function () {
+  gulp.src(['*.html'])
+    .pipe(fileinclude({
+      prefix: '@@',
+      basepath: '@file'
+    }))
+    .pipe(gulp.dest('./dest'));
+});
+
+
+// 壓圖
+var imagemin = require('gulp-imagemin');
+
+gulp.task('miniimg',function(){
+gulp.src('./dev/images/*')
+.pipe(imagemin())
+.pipe(gulp.dest('dest/images'))
+})  

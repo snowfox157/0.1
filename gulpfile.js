@@ -89,6 +89,7 @@ gulp.task('fileinclude', function () {
 
 // html 樣板
 var fileinclude = require('gulp-file-include');
+
 gulp.task('fileinclude', function () {
   gulp.src(['*.html'])
     .pipe(fileinclude({
@@ -107,3 +108,62 @@ gulp.src('./dev/images/*')
 .pipe(imagemin())
 .pipe(gulp.dest('dest/images'))
 })  
+
+//同步
+gulp.task('default', function() {
+  browserSync.init({
+      server: {
+          baseDir: "./dest",
+          index : "index.html"
+      }
+  });
+  gulp.watch('./sass/*.scss' ,['sass']).on('change',reload);
+  gulp.watch(['./*.html' ,'./**/*.html'] ,['fileinclude']).on('change',reload);
+});
+
+//ftp上傳
+var gutil = require( 'gulp-util' );
+var ftp = require( 'vinyl-ftp' );
+gulp.task('ftp',function(){
+
+  var conn = ftp.create({
+    host:     '140.115.236.71',
+    user :     '%ed101+',
+    password:  '!654=stu&',
+    parallel: 10
+  });
+  var globs = [
+    'dest/**',
+    'dest/css/**',
+    'dest/images/**',
+    'index.html',
+    'new/*'
+    ];
+  return gulp.src( globs, { base: '.', buffer: false } )
+  .pipe( conn.newer( '/T2000270' ) ) // only upload newer files
+  .pipe( conn.dest( '/T2000270' ) );
+});
+
+//php
+
+var  connect = require('gulp-connect-php');
+gulp.task('php',function(){
+  connect.server({
+    base:'./php',
+    port:8010,
+    keepalive:true
+  });
+});
+
+gulp.task('browserSync',['php'],function(){
+  browserSync.init({
+    //proxy:"localhost:8010",
+    baseDir:"./php",
+    open:true,
+    notify:false
+  });
+});
+
+gulp.task('dev',['browserSync'], function(){
+  gulp.watch('./php/*.php',browserSync.reload)
+})
